@@ -1,10 +1,14 @@
 import 'package:cash_prow/core/widgets/app_user_avatar.dart';
 import 'package:cash_prow/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:cash_prow/features/auth/presentation/screens/login_screen.dart';
+import 'package:cash_prow/features/giftcards/presentation/screens/gift_card_screen.dart';
 import 'package:cash_prow/features/leads/presentation/providers/leads_controller.dart';
 import 'package:cash_prow/features/profile/presentation/screens/profile_screen.dart';
+import 'package:cash_prow/features/referal/presentation/screens/add_referral_screen.dart';
+import 'package:cash_prow/features/support/presentation/screens/help_and_support_screen.dart';
+import 'package:cash_prow/features/tools/emicalculator/emi_calculator.dart';
 import 'package:cash_prow/features/tutorials/screens/demo_video_screen.dart';
-import 'package:cash_prow/features/rewards/screens/redeem_points_screen.dart';
+import 'package:cash_prow/features/rewards/presentation/screens/redeem_points_screen.dart';
 import 'package:cash_prow/features/home/widgets/expandable_lead_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +34,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     final authState = ref.watch(authControllerProvider);
     final user = authState.user;
 
@@ -43,44 +50,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: primary,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "Cash Prow",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.4,
+
+        /// ☰ Custom Drawer Button
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: Colors.white,
+                size: 28, // 🔥 bigger hamburger
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+
+        /// 🏷 Center Logo
+        title: SizedBox(
+          height: 36,
+          child: Image.asset(
+            "assets/images/logo_white.png",
+            fit: BoxFit.contain,
           ),
         ),
+
+        /// ➕ Add Referral Button
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: SizedBox(
-              width: 50,
-              height: 50,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Image.asset("assets/images/logo_white.png"),
-              ),
+          IconButton(
+            icon: const Icon(
+              Icons.person_add_alt_1_rounded,
+              color: Colors.white,
+              size: 26, // 🔥 slightly large
             ),
+            tooltip: "Add Referral",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddReferralScreen()),
+              );
+            },
           ),
+          const SizedBox(width: 8),
         ],
       ),
 
       drawer: Drawer(
         child: Column(
           children: [
-            // 🔥 Attractive Header
+            // 🔥 HEADER
             Stack(
               children: [
                 Container(
                   height: 150,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
+                      colors: [primary, primary.withOpacity(0.75)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -100,7 +129,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: AppColors.card,
-
                           child: AppUserAvatar(
                             radius: 28,
                             profileImageUrl: user?.profileImageUrl,
@@ -140,12 +168,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icons.home_rounded,
               title: 'Home',
               isActive: true,
+              primary: primary,
               onTap: () => Navigator.pop(context),
             ),
             drawerCard(
               context: context,
               icon: Icons.person_rounded,
               title: 'Profile',
+              primary: primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -155,8 +185,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             drawerCard(
               context: context,
-              icon: Icons.redeem,
-              title: 'redeem',
+              icon: Icons.money,
+              title: 'Redeem',
+              primary: primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -166,8 +197,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             drawerCard(
               context: context,
+              icon: Icons.card_giftcard,
+              title: 'Gift Cards',
+              primary: primary,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const GiftCardScreen()),
+                );
+              },
+            ),
+            drawerCard(
+              context: context,
+              icon: Icons.calculate,
+              title: 'Emi Calculator',
+              primary: primary,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const EmiCalculatorScreen(),
+                  ),
+                );
+              },
+            ),
+            drawerCard(
+              context: context,
               icon: Icons.video_call,
-              title: 'demo videos',
+              title: 'Demo Videos',
+              primary: primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -177,8 +235,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             drawerCard(
               context: context,
+              icon: Icons.help,
+              title: 'Help & Support',
+              primary: primary,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                );
+              },
+            ),
+            drawerCard(
+              context: context,
               icon: Icons.settings_rounded,
               title: 'Settings',
+              primary: primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -207,21 +278,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.10),
-
+                    color: primary.withOpacity(0.10),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout, color: AppColors.primary),
-
-                      SizedBox(width: 8),
+                      Icon(Icons.logout, color: primary),
+                      const SizedBox(width: 8),
                       Text(
                         'Logout',
                         style: TextStyle(
-                          color: AppColors.primary,
-
+                          color: primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -234,7 +302,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
 
-      // ✅ REAL LEADS UI
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(leadsControllerProvider.notifier).fetchLeads();
@@ -272,6 +339,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required Color primary,
     bool isActive = false,
   }) {
     return Padding(
@@ -294,17 +362,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                color: isActive ? AppColors.primary : Colors.grey[700],
-              ),
+              Icon(icon, color: isActive ? primary : Colors.grey[700]),
               const SizedBox(width: 14),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive ? AppColors.primary : AppColors.textPrimary,
+                  color: isActive ? primary : AppColors.textPrimary,
                 ),
               ),
             ],

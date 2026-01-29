@@ -8,7 +8,9 @@ class UserModel {
   final String? card;
   final int points;
   final String? gender;
-  final String? profileImageUrl; // ✅ added
+  final String? profileImageUrl;
+  final String? occupation;
+  final double? salary; // ✅ added
 
   final DateTime? dob;
   final DateTime? createdAt;
@@ -23,7 +25,9 @@ class UserModel {
     this.product,
     this.card,
     required this.points,
-    this.profileImageUrl, // ✅ added
+    this.profileImageUrl,
+    this.occupation,
+    this.salary,
     this.dob,
     this.createdAt,
     this.updatedAt,
@@ -48,7 +52,10 @@ class UserModel {
 
       profileImageUrl: json["profileImageUrl"]?.toString(), // ✅ added
       gender: json["gender"]?.toString(),
+      occupation: json["occupation"]?.toString(), // ✅ added
+      salary: (json["salary"] as num?)?.toDouble(),
 
+      // ✅ added
       dob: parseDate(json["dob"]),
       createdAt: parseDate(json["createdAt"]),
       updatedAt: parseDate(json["updatedAt"]),

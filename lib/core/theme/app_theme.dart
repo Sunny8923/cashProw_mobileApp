@@ -2,28 +2,34 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData lightTheme = ThemeData(
-    scaffoldBackgroundColor: AppColors.background,
+  static ThemeData lightTheme(Color primary) {
+    return ThemeData(
+      scaffoldBackgroundColor: AppColors.background,
 
-    colorScheme: ColorScheme.light(
-      primary: Color(0xFFBF4000),
-      surface: AppColors.card,
-    ),
+      colorScheme: ColorScheme.light(primary: primary, surface: AppColors.card),
 
-    cardColor: AppColors.card,
+      cardColor: AppColors.card,
 
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: AppColors.textPrimary),
-      bodyMedium: TextStyle(color: AppColors.textPrimary),
-      bodySmall: TextStyle(color: AppColors.textSecondary),
-    ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: AppColors.textPrimary),
+        bodyMedium: TextStyle(color: AppColors.textPrimary),
+        bodySmall: TextStyle(color: AppColors.textSecondary),
+      ),
 
-    dividerColor: AppColors.border,
+      dividerColor: AppColors.border,
 
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.background,
-      foregroundColor: AppColors.textPrimary,
-      elevation: 0,
-    ),
-  );
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
 }

@@ -5,8 +5,10 @@ class DemoVideosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xffF5F7FB),
+      backgroundColor: theme.colorScheme.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -14,13 +16,16 @@ class DemoVideosScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 50, bottom: 30),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xff5B86E5), Color(0xff36D1DC)],
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.primaryContainer,
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(28),
                   bottomRight: Radius.circular(28),
                 ),
@@ -43,11 +48,10 @@ class DemoVideosScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Demo Videos',
-                      style: TextStyle(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
-                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -100,6 +104,8 @@ class _DemoVideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return InkWell(
       onTap: () {
         // TODO: Open video player / YouTube
@@ -107,7 +113,7 @@ class _DemoVideoCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -130,21 +136,23 @@ class _DemoVideoCard extends StatelessWidget {
                   child: Container(
                     height: 180,
                     width: double.infinity,
-                    color: Colors.grey.shade300,
-                    child: const Icon(
+                    color: theme.colorScheme.onSurface.withOpacity(0.05),
+                    child: Icon(
                       Icons.video_library,
                       size: 60,
-                      color: Colors.white70,
+                      color: theme.colorScheme.onSurface.withOpacity(0.3),
                     ),
                   ),
                 ),
 
                 // ▶ PLAY BUTTON
-                const Positioned.fill(
+                Positioned.fill(
                   child: Center(
                     child: CircleAvatar(
                       radius: 26,
-                      backgroundColor: Colors.black54,
+                      backgroundColor: theme.colorScheme.onSurface.withOpacity(
+                        0.5,
+                      ),
                       child: Icon(
                         Icons.play_arrow,
                         color: Colors.white,
@@ -164,12 +172,15 @@ class _DemoVideoCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black54,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       duration,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -181,9 +192,9 @@ class _DemoVideoCard extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),

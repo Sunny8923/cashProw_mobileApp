@@ -4,6 +4,19 @@ import '../../../../core/network/api_endpoints.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<String> uploadProfilePicture(String filePath);
+
+  Future<void> updateProfile({
+    String? address,
+    String? occupation,
+    double? salary,
+  });
+
+  // 👉 EMAIL CHANGE OTP
+  Future<void> requestChangeEmail(String newEmail);
+  Future<void> verifyChangeEmail({
+    required String newEmail,
+    required String otp,
+  });
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -23,23 +36,46 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         options: Options(contentType: "multipart/form-data"),
       );
 
-      final data = response.data;
-
-      if (data is Map<String, dynamic>) {
-        final payload = data["data"];
-        if (payload is Map<String, dynamic>) {
-          final url = payload["profileImageUrl"];
-          if (url is String) return url;
-        }
-      }
-
-      throw Exception("Invalid upload response format");
-    } on DioException catch (e) {
-      final backend = e.response?.data;
-      if (backend is Map<String, dynamic>) {
-        throw Exception(backend["message"] ?? "Upload failed");
-      }
+      final payload = response.data["data"];
+      return payload["profileImageUrl"];
+    } catch (e) {
       throw Exception("Upload failed");
     }
+  }
+
+  @override
+  Future<void> updateProfile({
+    String? address,
+    String? occupation,
+    double? salary,
+  }) async {
+    final body = <String, dynamic>{};
+
+    if (address != null) body["address"] = address;
+    if (occupation != null) body["occupation"] = occupation;
+    if (salary != null) body["salary"] = salary;
+
+    await apiClient.patch(ApiEndpoints.updateProfile, data: body);
+  }
+
+  // ---------------- EMAIL OTP ----------------
+
+  @override
+  Future<void> requestChangeEmail(String newEmail) async {
+    await apiClient.post(
+      ApiEndpoints.requestChangeEmail,
+      data: {"newEmail": newEmail},
+    );
+  }
+
+  @override
+  Future<void> verifyChangeEmail({
+    required String newEmail,
+    required String otp,
+  }) async {
+    await apiClient.post(
+      ApiEndpoints.verifyChangeEmail,
+      data: {"newEmail": newEmail, "otp": otp},
+    );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:cash_prow/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../controllers/auth_controller.dart';
+import 'package:cash_prow/core/theme/app_colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -30,9 +30,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final theme = Theme.of(context);
+    final primary = AppColors.primary;
 
     // ✅ Listen for error / success
-    ref.listen<AuthState>(authControllerProvider, (prev, next) {
+    ref.listen(authControllerProvider, (prev, next) {
       if (next.error != null && next.error!.isNotEmpty) {
         ScaffoldMessenger.of(
           context,
@@ -48,73 +50,120 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xffF5F7FB),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 70),
-
-              // 🏢 Company Logo (CENTER)
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      height: 90,
-                      width: 90,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/company_logo.jpeg',
-                          height: 55,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 🔝 GRADIENT HEADER + LOGO
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 60, bottom: 40),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.circular(28),
                 ),
               ),
+              child: Column(
+                children: [
+                  // 🔙 Back button + Title
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        InkWell(
+                          onTap: () => Navigator.pop(context),
+                          borderRadius: BorderRadius.circular(12),
+                          child: const Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Login',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-              const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
-              // 📧 Email / Mobile
-              _inputField(
+                  // 🏢 Company Logo (CENTER)
+                  Container(
+                    height: 90,
+                    width: 90,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/company_logo.jpeg',
+                        height: 55,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // 📧 Email / Mobile
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _inputField(
                 controller: _emailMobileController,
                 hint: 'Email or Mobile number',
                 icon: Icons.person_outline,
-                keyboardType: TextInputType.emailAddress,
               ),
+            ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // 🔑 Password OR OTP
-              if (!_loginWithOtp)
-                _passwordField()
-              else
-                _inputField(
-                  controller: _otpController,
-                  hint: 'Enter OTP',
-                  icon: Icons.lock_outline,
-                  keyboardType: TextInputType.number,
-                ),
+            // 🔑 Password OR OTP
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: !_loginWithOtp
+                  ? _passwordField()
+                  : _inputField(
+                      controller: _otpController,
+                      hint: 'Enter OTP',
+                      icon: Icons.lock_outline,
+                      keyboardType: TextInputType.number,
+                    ),
+            ),
 
-              const SizedBox(height: 6),
-              const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-              // 🔁 Toggle login mode
-              Align(
+            // 🔁 Toggle login mode
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: authState.isLoading
@@ -129,11 +178,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-              // 🚀 Login Button
-              SizedBox(
+            // 🚀 Login Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
@@ -153,7 +205,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           }
 
                           if (_loginWithOtp) {
-                            // ✅ OTP logic not implemented yet
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("OTP login not implemented yet"),
@@ -170,13 +221,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             return;
                           }
 
-                          // ✅ Call API via Riverpod
                           await ref
                               .read(authControllerProvider.notifier)
                               .login(email: emailOrMobile, password: password);
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff5B86E5),
+                    backgroundColor: primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -185,27 +235,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ? const SizedBox(
                           height: 22,
                           width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : Text(
                           _loginWithOtp ? 'Send OTP' : 'Login',
-                          style: const TextStyle(fontSize: 16),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-              // 🔒 Forgot Password
-              if (!_loginWithOtp)
-                Center(
-                  child: TextButton(
-                    onPressed: authState.isLoading ? null : () {},
-                    child: const Text('Forgot Password?'),
-                  ),
+            // 🔒 Forgot Password
+            if (!_loginWithOtp)
+              Center(
+                child: TextButton(
+                  onPressed: authState.isLoading ? null : () {},
+                  child: const Text('Forgot Password?'),
                 ),
-            ],
-          ),
+              ),
+
+            const SizedBox(height: 30),
+          ],
         ),
       ),
     );

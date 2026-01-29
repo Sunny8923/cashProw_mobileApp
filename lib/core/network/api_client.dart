@@ -27,10 +27,17 @@ class ApiClient {
 
           return handler.next(options);
         },
+
+        // ✅ Optional: handle errors globally (nice for debugging)
+        onError: (DioException e, handler) {
+          // You can add logging here later if needed
+          return handler.next(e);
+        },
       ),
     );
   }
 
+  // -------- POST --------
   Future<Response> post(
     String path, {
     dynamic data,
@@ -45,11 +52,42 @@ class ApiClient {
     );
   }
 
+  // -------- GET --------
   Future<Response> get(
     String path, {
     Map<String, dynamic>? query,
     Options? options,
   }) async {
     return await dio.get(path, queryParameters: query, options: options);
+  }
+
+  // -------- PUT --------
+  Future<Response> put(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? query,
+    Options? options,
+  }) async {
+    return await dio.put(
+      path,
+      data: data,
+      queryParameters: query,
+      options: options,
+    );
+  }
+
+  // -------- PATCH --------
+  Future<Response> patch(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? query,
+    Options? options,
+  }) async {
+    return await dio.patch(
+      path,
+      data: data,
+      queryParameters: query,
+      options: options,
+    );
   }
 }

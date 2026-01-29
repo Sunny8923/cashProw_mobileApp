@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cash_prow/core/widgets/app_user_avatar.dart';
 import 'package:cash_prow/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:cash_prow/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LeadCardAvatar extends ConsumerWidget {
@@ -10,23 +9,23 @@ class LeadCardAvatar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).user;
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final primaryLight = primary.withOpacity(0.5);
 
     return Container(
       height: 46,
       width: 46,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-
-        // ✅ Brand gradient (no tertiary)
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+        gradient: LinearGradient(
+          colors: [primary, primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.22),
+            color: primary.withOpacity(0.22),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -43,7 +42,7 @@ class LeadCardAvatar extends ConsumerWidget {
   }
 }
 
-/// ✅ Status pill with dot indicator
+/// Status pill with dot indicator
 class LeadCardStatusPillDot extends StatelessWidget {
   final String status;
 
@@ -51,15 +50,17 @@ class LeadCardStatusPillDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final success = Colors.green; // you can make this dynamic if added to Theme
+    final warning = Colors.orange; // dynamic optional
+
     final s = status.toLowerCase();
 
     final isGreen = s == 'disbursed' || s == 'approved';
     final isWarning = s == 'pending' || s == 'in progress' || s == 'new';
 
-    final fg = isGreen
-        ? AppColors.success
-        : (isWarning ? AppColors.warning : AppColors.primary);
-
+    final fg = isGreen ? success : (isWarning ? warning : primary);
     final bg = fg.withOpacity(0.12);
 
     return Container(
@@ -93,7 +94,7 @@ class LeadCardStatusPillDot extends StatelessWidget {
   }
 }
 
-/// ✅ Outlined type pill
+/// Outlined type pill
 class LeadCardTypePillOutlined extends StatelessWidget {
   final String type;
 
@@ -101,10 +102,13 @@ class LeadCardTypePillOutlined extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final primaryDark = primary.withOpacity(0.8);
+
     final isSelf = type.toLowerCase() == "self";
 
-    // ✅ Self = primary, Referral = darker primary (no purple)
-    final fg = isSelf ? AppColors.primary : AppColors.primaryDark;
+    final fg = isSelf ? primary : primaryDark;
     final bg = fg.withOpacity(0.10);
 
     return Container(
@@ -127,7 +131,7 @@ class LeadCardTypePillOutlined extends StatelessWidget {
   }
 }
 
-/// ✅ More modern points pill (premium)
+/// Modern points pill
 class LeadCardPointsPillModern extends StatelessWidget {
   final int points;
 
@@ -136,16 +140,17 @@ class LeadCardPointsPillModern extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final border = theme.dividerColor;
+    final background = theme.cardColor;
+    final warning = Colors.orange; // optional: make dynamic in ThemeData
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-
-        // ✅ warm tint
-        color: AppColors.background,
-        border: Border.all(color: AppColors.border),
-
+        color: background,
+        border: Border.all(color: border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -157,13 +162,13 @@ class LeadCardPointsPillModern extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star_rounded, size: 18, color: AppColors.warning),
+          Icon(Icons.star_rounded, size: 18, color: warning),
           const SizedBox(width: 4),
           Text(
             "$points pts",
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
+              color: theme.textTheme.bodyLarge?.color ?? primary,
             ),
           ),
         ],

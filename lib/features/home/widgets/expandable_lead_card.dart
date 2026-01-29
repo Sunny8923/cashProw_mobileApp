@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cash_prow/features/leads/models/lead_model.dart';
-import 'package:cash_prow/core/theme/app_colors.dart';
 
 import 'lead_card_header.dart';
 import 'lead_card_details.dart';
@@ -22,18 +21,18 @@ class _ExpandableLeadCardState extends State<ExpandableLeadCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_radius),
-
-        // ✅ Brand gradient border
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+        gradient: LinearGradient(
+          colors: [primary, primary.withOpacity(0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -42,11 +41,12 @@ class _ExpandableLeadCardState extends State<ExpandableLeadCard> {
           ),
         ],
       ),
+
+      /// 🔹 Border thickness
       child: Container(
         margin: const EdgeInsets.all(1.2),
         decoration: BoxDecoration(
-          // ✅ Warm tinted surface
-          color: AppColors.background,
+          color: theme.cardColor, // ✅ SAME COLOR FOR ENTIRE CARD
           borderRadius: BorderRadius.circular(_radius - 1),
         ),
         child: Material(
@@ -62,7 +62,7 @@ class _ExpandableLeadCardState extends State<ExpandableLeadCard> {
                   /// ✅ Header
                   LeadCardHeader(lead: widget.lead, expanded: _expanded),
 
-                  /// ✅ Expand area
+                  /// ✅ Expand area (NO extra background)
                   AnimatedSize(
                     duration: const Duration(milliseconds: 260),
                     curve: Curves.easeInOut,

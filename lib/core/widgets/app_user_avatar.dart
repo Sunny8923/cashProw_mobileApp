@@ -14,7 +14,10 @@ class AppUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = profileImageUrl != null && profileImageUrl!.isNotEmpty;
+    final hasImage =
+        profileImageUrl != null &&
+        profileImageUrl!.trim().isNotEmpty &&
+        profileImageUrl != "null";
 
     if (hasImage) {
       return CircleAvatar(
