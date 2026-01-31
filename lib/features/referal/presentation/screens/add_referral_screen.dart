@@ -48,119 +48,182 @@ class _AddReferralScreenState extends ConsumerState<AddReferralScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-
-      appBar: AppBar(title: const Text("Add Referral"), centerTitle: true),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            /// 🔥 Top Info Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [primary, primary.withOpacity(0.85)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
+      body: Column(
+        children: [
+          /// 🔝 GRADIENT HEADER (same app style)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 52, bottom: 32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [primary, primary.withOpacity(0.75)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.person_add_alt_1_rounded,
-                    color: Colors.white,
-                    size: 28,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+
+                /// 🔙 CUSTOM BACK BUTTON
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 6,
+                          color: Colors.black.withOpacity(0.15),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      "Add a new referral lead and start earning rewards",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                ),
+
+                const SizedBox(width: 12),
+
+                const Text(
+                  "Add Referral",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          /// 📋 CONTENT (scrollable)
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  /// 🔥 Top Info Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [primary, primary.withOpacity(0.85)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.person_add_alt_1_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Add a new referral lead and start earning rewards",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  /// 🧾 Form Card
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            _field(
+                              controller: _nameCtrl,
+                              label: "Referral Name",
+                              icon: Icons.person_outline_rounded,
+                            ),
+
+                            _field(
+                              controller: _mobileCtrl,
+                              label: "Reference Mobile No",
+                              icon: Icons.phone_outlined,
+                              keyboard: TextInputType.phone,
+                              maxLength: 10,
+                            ),
+
+                            _productDropdown(),
+
+                            _field(
+                              controller: _locationCtrl,
+                              label: "Location",
+                              icon: Icons.location_on_outlined,
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                onPressed: leadState.loading ? null : _submit,
+                                child: leadState.loading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text("Submit Referral"),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 18),
-
-            /// 🧾 Form Card
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      _field(
-                        controller: _nameCtrl,
-                        label: "Referral Name",
-                        icon: Icons.person_outline_rounded,
-                      ),
-
-                      _field(
-                        controller: _mobileCtrl,
-                        label: "Reference Mobile No",
-                        icon: Icons.phone_outlined,
-                        keyboard: TextInputType.phone,
-                        maxLength: 10,
-                      ),
-
-                      _productDropdown(primary),
-
-                      _field(
-                        controller: _locationCtrl,
-                        label: "Location",
-                        icon: Icons.location_on_outlined,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          onPressed: leadState.loading ? null : _submit,
-                          child: leadState.loading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text("Submit Referral"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -191,7 +254,7 @@ class _AddReferralScreenState extends ConsumerState<AddReferralScreen> {
     );
   }
 
-  Widget _productDropdown(Color primary) {
+  Widget _productDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: DropdownButtonFormField<String>(

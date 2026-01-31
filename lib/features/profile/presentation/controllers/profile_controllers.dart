@@ -141,7 +141,7 @@ class ProfileController extends Notifier<ProfileState> {
     }
   }
 
-  Future<void> verifyEmailOtp(String email, String otp) async {
+  Future<bool> verifyEmailOtp(String email, String otp) async {
     try {
       state = state.copyWith(otpLoading: true, error: null);
 
@@ -152,8 +152,12 @@ class ProfileController extends Notifier<ProfileState> {
       await ref.read(authControllerProvider.notifier).loadSession();
 
       state = state.copyWith(otpLoading: false);
+
+      return true; // ✅ OTP SUCCESS
     } catch (e) {
       state = state.copyWith(otpLoading: false, error: e.toString());
+
+      return false; // ❌ OTP FAILED
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cash_prow/core/app_root.dart';
 import 'package:cash_prow/core/theme/app_theme.dart';
 import 'package:cash_prow/core/theme/theme_provider.dart';
 import 'package:cash_prow/features/splash/splash_screen.dart';
@@ -18,7 +19,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(primaryColor),
-      home: const SplashScreen(),
+      home: AppRoot(),
     );
   }
 }

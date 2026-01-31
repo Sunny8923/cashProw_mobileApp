@@ -13,39 +13,66 @@ class AvailablePointsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            colors: [primary.withOpacity(0.08), primary.withOpacity(0.02)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: primary.withOpacity(0.15)),
           boxShadow: [
             BoxShadow(
+              blurRadius: 20,
               color: Colors.black.withOpacity(0.06),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Row(
           children: [
+            /// ⭐ ICON BUBBLE
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: primary.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(14),
+                gradient: LinearGradient(
+                  colors: [primary, primary.withOpacity(0.75)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(blurRadius: 10, color: primary.withOpacity(0.35)),
+                ],
               ),
-              child: Icon(Icons.star_rounded, color: primary, size: 30),
+              child: const Icon(
+                Icons.star_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
             ),
-            const SizedBox(width: 16),
+
+            const SizedBox(width: 18),
+
+            /// 📊 TEXT
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Available Points"),
+                Text(
+                  "Available Points",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.textTheme.bodyMedium?.color,
+                    letterSpacing: 0.4,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   "$points pts",
                   style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],

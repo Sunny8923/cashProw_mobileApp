@@ -1,202 +1,143 @@
+import 'package:cash_prow/core/widgets/app_back_button.dart';
 import 'package:cash_prow/core/widgets/app_user_avatar.dart';
-import 'package:cash_prow/features/profile/presentation/controllers/profile_controllers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-class ProfileHeader extends ConsumerWidget {
+class ProfileHeader extends StatelessWidget {
   final dynamic user;
+  final double completion;
 
-  const ProfileHeader({super.key, required this.user});
+  const ProfileHeader({
+    super.key,
+    required this.user,
+    required this.completion,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    final name = user?.name?.trim().isNotEmpty == true ? user!.name! : "User";
-    final membership = "Silver";
-
-    final profileState = ref.watch(profileControllerProvider);
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
 
     return SizedBox(
+      height: 420,
       width: double.infinity,
-      height: 240, // ⭐ IMPORTANT: allows avatar + button to receive taps
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
-          /// 🎨 Header Background
+          /// 🎨 BACKGROUND WITH ROUND BOTTOM
           Container(
-            width: double.infinity,
-            height: 170,
-            padding: const EdgeInsets.only(top: 40),
+            height: 350,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primary, primary.withOpacity(0.8)],
+                colors: [primary, primary.withOpacity(0.75)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
               ),
             ),
-            child: Column(
+            child: Stack(
               children: [
-                Text(
-                  "Hi, $name 👋",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _MembershipBadge(label: "$membership Member"),
+                _bubble(-50, -20, 130), // left partially out
+                _bubble(220, -40, 120), // top partially out
+                _bubble(40, 170, 60), // center soft
+                _bubble(300, 100, 170), // right partially out
               ],
             ),
           ),
 
-          /// 🔙 Back Button
-          Positioned(
-            top: 20,
-            left: 18,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-            ),
-          ),
+          /// 🔙 BACK BUTTON
+          Positioned(top: 36, left: 16, child: const AppBackButton()),
 
-          /// 👤 Avatar + Edit Button
+          /// 📛 USERNAME AT TOP
           Positioned(
-            top: 130,
+            top: 40,
             left: 0,
             right: 0,
             child: Center(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  CircleAvatar(
-                    radius: 42,
-                    backgroundColor: theme.cardColor,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        AppUserAvatar(
-                          radius: 38,
-                          profileImageUrl: user?.profileImageUrl,
-                          gender: user?.gender,
-                        ),
+              child: Text(
+                "Hi, ${user?.name ?? "User"} 👋",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
 
-                        if (profileState.uploading)
-                          Container(
-                            width: 76,
-                            height: 76,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.35),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+          /// 👤 AVATAR CENTER
+          Positioned(
+            top: 90,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: CircularPercentIndicator(
+                radius: 48,
+                lineWidth: 8,
+                percent: (completion / 100).clamp(0, 1),
+                animation: true,
+                circularStrokeCap: CircularStrokeCap.round,
+                backgroundColor: Colors.white24,
+                linearGradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFFFB7A5),
+                    Color(0xFFF4A08A),
+                    Color(0xFFE07A73),
+                  ],
+                ),
+                center: AppUserAvatar(
+                  profileImageUrl: user?.profileImageUrl,
+                  gender: user?.gender,
+                  radius: 40,
+                ),
+              ),
+            ),
+          ),
 
-                  /// 📸 Edit Button (now fully clickable)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        ref
-                            .read(profileControllerProvider.notifier)
-                            .uploadProfilePicture();
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.25),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+          /// 📊 % BELOW AVATAR
+          Positioned(
+            top: 210,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Text(
+                  "${completion.toInt()}% Complete",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF374151),
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn().slideY(begin: 0.12);
   }
-}
 
-/// 🔹 Membership badge widget
-class _MembershipBadge extends StatelessWidget {
-  final String label;
-
-  const _MembershipBadge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFE5E7EB), Color(0xFF9CA3AF)],
+  Widget _bubble(double left, double top, double size) {
+    return Positioned(
+      left: left,
+      top: top,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          shape: BoxShape.circle,
         ),
-        borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.18),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.star_rounded, size: 14, color: Color(0xFF374151)),
-          SizedBox(width: 4),
-          Text(
-            "Silver Member",
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF374151),
-            ),
-          ),
-        ],
       ),
     );
   }

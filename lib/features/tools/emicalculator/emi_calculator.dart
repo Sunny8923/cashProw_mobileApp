@@ -35,15 +35,14 @@ class _EmiCalculatorScreenState extends State<EmiCalculatorScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            /// 🔝 HEADER (same gradient style)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.only(top: 50, bottom: 30),
+              padding: const EdgeInsets.only(top: 52, bottom: 32),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
                     theme.colorScheme.primary,
-                    theme.colorScheme.primaryContainer,
+                    theme.colorScheme.primary.withOpacity(0.75),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -53,32 +52,45 @@ class _EmiCalculatorScreenState extends State<EmiCalculatorScreen> {
                   bottomRight: Radius.circular(28),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      borderRadius: BorderRadius.circular(12),
-                      child: const Padding(
-                        padding: EdgeInsets.all(6),
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+
+                  /// 🔙 CUSTOM BACK BUTTON
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 6,
+                            color: Colors.black.withOpacity(0.15),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'EMI Calculator',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
                         color: Colors.white,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Text(
+                    "EMI Calculator",
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
 

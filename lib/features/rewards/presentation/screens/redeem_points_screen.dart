@@ -1,6 +1,7 @@
+import 'package:cash_prow/core/widgets/app_back_button.dart';
 import 'package:cash_prow/features/rewards/presentation/widgets/available_points_card.dart';
 import 'package:cash_prow/features/rewards/presentation/widgets/cube_auto_slider.dart';
-import 'package:cash_prow/features/rewards/presentation/widgets/featured_reward_card.dart';
+import 'package:cash_prow/features/rewards/presentation/widgets/featured_reward_carousel.dart';
 import 'package:cash_prow/features/rewards/presentation/widgets/reward_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -58,17 +59,22 @@ class RedeemPointsScreen extends StatelessWidget {
             padding: const EdgeInsets.only(top: 50, bottom: 28),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primary, primary.withOpacity(0.7)],
+                colors: [
+                  primary,
+                  primary.withOpacity(0.75),
+                ], // 👈 same as profile
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
+                bottomLeft: Radius.circular(40), // 👈 match profile smoothness
+                bottomRight: Radius.circular(40),
               ),
             ),
             child: Row(
               children: const [
                 SizedBox(width: 16),
-                BackButton(color: Colors.white),
+                AppBackButton(),
                 SizedBox(width: 12),
                 Text(
                   "Redeem Points",
@@ -99,8 +105,8 @@ class RedeemPointsScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                FeaturedRewardCard(
-                  reward: featuredReward,
+                FeaturedRewardsCarousel(
+                  rewards: rewards,
                   availablePoints: availablePoints,
                 ),
 

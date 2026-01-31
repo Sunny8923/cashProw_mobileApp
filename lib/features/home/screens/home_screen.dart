@@ -1,19 +1,11 @@
-import 'package:cash_prow/core/widgets/app_user_avatar.dart';
-import 'package:cash_prow/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:cash_prow/features/auth/presentation/screens/login_screen.dart';
-import 'package:cash_prow/features/giftcards/presentation/screens/gift_card_screen.dart';
+import 'package:cash_prow/features/home/widgets/home_drawer.dart';
+import 'package:cash_prow/features/home/widgets/home_summary_card.dart';
 import 'package:cash_prow/features/leads/presentation/providers/leads_controller.dart';
-import 'package:cash_prow/features/profile/presentation/screens/profile_screen.dart';
 import 'package:cash_prow/features/referal/presentation/screens/add_referral_screen.dart';
-import 'package:cash_prow/features/support/presentation/screens/help_and_support_screen.dart';
-import 'package:cash_prow/features/tools/emicalculator/emi_calculator.dart';
-import 'package:cash_prow/features/tutorials/screens/demo_video_screen.dart';
-import 'package:cash_prow/features/rewards/presentation/screens/redeem_points_screen.dart';
 import 'package:cash_prow/features/home/widgets/expandable_lead_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../settings/screens/settings_screen.dart';
-import 'package:cash_prow/core/theme/app_colors.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -23,71 +15,101 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedTab = 0; // 0 = Self, 1 = Referral
+  String _statusFilter = "All";
+
   @override
   void initState() {
     super.initState();
-
-    Future.microtask(() async {
-      await ref.read(leadsControllerProvider.notifier).fetchLeads();
+    Future.microtask(() {
+      ref.read(leadsControllerProvider.notifier).fetchLeads();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
-    final authState = ref.watch(authControllerProvider);
-    final user = authState.user;
+    final primary = Theme.of(context).colorScheme.primary;
 
     final leadsState = ref.watch(leadsControllerProvider);
-    final leads = leadsState.leads;
+    final allLeads = leadsState.leads;
 
-    final displayName = user?.name?.trim().isNotEmpty == true
-        ? user!.name!
-        : "User";
-    final displayEmail = user?.email ?? "-";
+    // ---------------- SUMMARY CALCULATIONS ----------------
+
+    final totalPoints = allLeads.fold<int>(0, (sum, l) => sum + l.points);
+
+    final selfLeads = allLeads
+        .where((l) => l.type.toLowerCase().contains("self"))
+        .length;
+
+    final referralLeads = allLeads
+        .where((l) => l.type.toLowerCase().contains("referral"))
+        .length;
+
+    final approvedLeads = allLeads.where((l) {
+      final s = (l.status ?? "").toLowerCase();
+      return s.contains("approved") || s.contains("disbursed");
+    }).length;
+
+    final pendingLeads = allLeads.where((l) {
+      final s = (l.status ?? "").toLowerCase();
+      return s.contains("pending") ||
+          s.contains("new") ||
+          s.contains("progress");
+    }).length;
+
+    // ---------------- FILTERED LIST ----------------
+
+    final leads = allLeads.where((lead) {
+      final type = lead.type.trim().toLowerCase();
+      final status = (lead.status ?? "").trim().toLowerCase();
+
+      final matchesType = _selectedTab == 0
+          ? type.contains("self")
+          : type.contains("referral");
+
+      if (!matchesType) return false;
+
+      if (_statusFilter == "All") return true;
+
+      if (_statusFilter == "Pending") {
+        return status.contains("pending") ||
+            status.contains("new") ||
+            status.contains("progress");
+      }
+
+      if (_statusFilter == "Approved") {
+        return status.contains("approved") || status.contains("disbursed");
+      }
+
+      if (_statusFilter == "Rejected") {
+        return status.contains("rejected");
+      }
+
+      return true;
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primary,
         elevation: 0,
         centerTitle: true,
-
-        /// ☰ Custom Drawer Button
         leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(
-                Icons.menu_rounded,
-                color: Colors.white,
-                size: 28, // 🔥 bigger hamburger
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-
-        /// 🏷 Center Logo
-        title: SizedBox(
-          height: 36,
-          child: Image.asset(
-            "assets/images/logo_white.png",
-            fit: BoxFit.contain,
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-
-        /// ➕ Add Referral Button
+        title: SizedBox(
+          height: 36,
+          child: Image.asset("assets/images/logo_white.png"),
+        ),
         actions: [
           IconButton(
             icon: const Icon(
               Icons.person_add_alt_1_rounded,
               color: Colors.white,
-              size: 26, // 🔥 slightly large
+              size: 26,
             ),
-            tooltip: "Add Referral",
             onPressed: () {
               Navigator.push(
                 context,
@@ -99,208 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
 
-      drawer: Drawer(
-        child: Column(
-          children: [
-            // 🔥 HEADER
-            Stack(
-              children: [
-                Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [primary, primary.withOpacity(0.75)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 25,
-                  left: 20,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: 30,
-                          backgroundColor: AppColors.card,
-                          child: AppUserAvatar(
-                            radius: 28,
-                            profileImageUrl: user?.profileImageUrl,
-                            gender: user?.gender,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            displayEmail,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            drawerCard(
-              context: context,
-              icon: Icons.home_rounded,
-              title: 'Home',
-              isActive: true,
-              primary: primary,
-              onTap: () => Navigator.pop(context),
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.person_rounded,
-              title: 'Profile',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.money,
-              title: 'Redeem',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RedeemPointsScreen()),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.card_giftcard,
-              title: 'Gift Cards',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const GiftCardScreen()),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.calculate,
-              title: 'Emi Calculator',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const EmiCalculatorScreen(),
-                  ),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.video_call,
-              title: 'Demo Videos',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DemoVideosScreen()),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.help,
-              title: 'Help & Support',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
-                );
-              },
-            ),
-            drawerCard(
-              context: context,
-              icon: Icons.settings_rounded,
-              title: 'Settings',
-              primary: primary,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                );
-              },
-            ),
-
-            const Spacer(),
-
-            // 🚪 Logout
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: GestureDetector(
-                onTap: () async {
-                  await ref.read(authControllerProvider.notifier).logout();
-
-                  if (!mounted) return;
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: primary.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout, color: primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: const HomeDrawer(),
 
       body: RefreshIndicator(
         onRefresh: () async {
@@ -316,17 +137,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               return Center(child: Text(leadsState.error!));
             }
 
-            if (leads.isEmpty) {
-              return const Center(child: Text("No leads found"));
-            }
+            return Column(
+              children: [
+                // 📊 SUMMARY CARD
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  child: HomeSummaryCard(
+                    totalPoints: totalPoints,
+                    selfLeads: selfLeads,
+                    referralLeads: referralLeads,
+                    approvedLeads: approvedLeads,
+                    pendingLeads: pendingLeads,
+                  ),
+                ),
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: leads.length,
-              itemBuilder: (context, index) {
-                final lead = leads[index];
-                return ExpandableLeadCard(lead: lead);
-              },
+                // 🔁 Self | Referral + Filter Button Row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: Row(
+                    children: [
+                      // Slider takes most space
+                      Expanded(child: _leadTypeSlider(primary)),
+
+                      const SizedBox(width: 10),
+
+                      // Filter Icon
+                      _statusFilterMenu(primary),
+                    ],
+                  ),
+                ),
+
+                // 📋 LIST AREA (or Lottie)
+                Expanded(
+                  child: leads.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 220,
+                                child: Lottie.asset(
+                                  "assets/lottie/no_data.json",
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                "No leads yet",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "Try changing filters or add new leads",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          itemCount: leads.length,
+                          itemBuilder: (context, index) {
+                            return ExpandableLeadCard(lead: leads[index]);
+                          },
+                        ),
+                ),
+              ],
             );
           },
         ),
@@ -334,47 +212,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget drawerCard({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    required Color primary,
-    bool isActive = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+  // ================= SLIDER =================
+
+  Widget _leadTypeSlider(Color primary) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          _sliderTab("Self", 0, primary),
+          _sliderTab("Referral", 1, primary),
+        ],
+      ),
+    );
+  }
+
+  Widget _sliderTab(String label, int index, Color primary) {
+    final active = _selectedTab == index;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedTab = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.card : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            color: active ? primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: isActive ? primary : Colors.grey[700]),
-              const SizedBox(width: 14),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive ? primary : AppColors.textPrimary,
-                ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: active ? Colors.white : Colors.black87,
               ),
-            ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _statusFilterMenu(Color primary) {
+    return PopupMenuButton<String>(
+      tooltip: "Filter status",
+      onSelected: (value) {
+        setState(() => _statusFilter = value);
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: "All", child: Text("All")),
+        PopupMenuItem(value: "Pending", child: Text("Pending")),
+        PopupMenuItem(value: "Approved", child: Text("Approved")),
+        PopupMenuItem(value: "Rejected", child: Text("Rejected")),
+      ],
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(Icons.filter_list_rounded, color: primary),
       ),
     );
   }
