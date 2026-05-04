@@ -1,7 +1,8 @@
 class ApiEndpoints {
   // static const String baseUrl = "http://localhost:5000";
   // static const String baseUrl = "http://10.0.2.2:5000"; // Android emulator
-  static const String baseUrl = "http://192.168.1.6:5000"; // real device
+  static const String baseUrl =
+      "http://88.222.244.233/uat-cashprow-api/"; // real device
 
   // -------- AUTH --------
   static const String login = "/api/auth/login";
